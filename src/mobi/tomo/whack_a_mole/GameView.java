@@ -51,7 +51,7 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 
     /**モグラ用のカウント*/
     int[] mole = new int[9] ;
-    //モグラの表示の有無
+    //モグラの表示の有無 0=false 1=true
     int[] mole_visible = new int[9] ;
     //モグラのヒットの有無 0=false 1=true
     int[] mole_hit = new int[9] ;
@@ -63,7 +63,7 @@ public class GameView extends SurfaceView implements Callback, Runnable {
     /**モグラステップ用int*/
     static final int STANDBY = 5; //スタンバイ
     static final int VISIBLE = 6; //みえてる
-    static final int HEDDEN = 7; //みえてない
+    static final int HIDDEN = 7; //みえてない
     static final int HIT = 8; //ヒットした
     static final int FINISH = 9; //ヒット後
     
@@ -104,7 +104,27 @@ public class GameView extends SurfaceView implements Callback, Runnable {
     int viewWidth;
     
     public void init(){
-    	
+		//モグラの初期化
+		int iiii = 0;
+		//９ならべる
+		for(int i = 0;i< 3;i++){
+		   for(int ii = 0;ii< 3;ii++){
+			   //c.drawBitmap(grass, drawX-imageWidth*i, drawY-imageHeight*ii, paint);
+				mole_visible[iiii] = rnd.nextInt(2);
+				//Log.d("mole_visible[iiii]---------", "" + mole_visible[iiii] + "");
+				mole_status[iiii] = STANDBY;
+				mole_hit[iiii] = 0;
+				mole_visible_sec[iiii] = 3000; //すべてのモグラに3000ミリ秒
+				if(mole_visible[iiii] == 1){
+					mole_status[iiii] = VISIBLE;
+				}else{
+					mole_status[iiii] = HIDDEN;
+				}
+				   iiii++;
+		   	}
+		}
+		//ゲームスタート
+		STAGE = GAME;
     }
     
     private Activity mActivity;
@@ -179,26 +199,7 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 			
 		switch (STAGE) {
 			case INIT:
-				//モグラの初期化
-				int iiii = 0;
-				//９ならべる
-				for(int i = 0;i< 3;i++){
-				   for(int ii = 0;ii< 3;ii++){
-					   //c.drawBitmap(grass, drawX-imageWidth*i, drawY-imageHeight*ii, paint);
-						Log.d("iiii---------", "" + iiii + "");
-						mole_visible[iiii] = rnd.nextInt(2);
-						mole_status[iiii] = STANDBY;
-						mole_hit[iiii] = 0;
-						mole_visible_sec[iiii] = 3000;
-						if(mole_visible[iiii] == 0){
-							mole_status[iiii] = VISIBLE;
-						}else{
-							mole_status[iiii] = HEDDEN;
-							   iiii++;
-						}
-				   	}
-				}
-				STAGE = GAME;
+				init();
 				break;
 			case GAME:
 				//キャンバス用意ロックする
@@ -211,26 +212,42 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 				for(int i = 0;i< 3;i++){
 				   for(int ii = 0;ii< 3;ii++){
 					//c.drawBitmap(grass, drawX-imageWidth*i, drawY-imageHeight*ii, paint);
-					Log.d("iii---------", "" + iii + "");
-						//モグラのステータスが見えるのとき
+						//モグラのステータス
 						switch (mole_status[iii]) {
 						case VISIBLE:
-							c.drawBitmap(grass, 100+imageWidth*i, 100+imageHeight*ii, paint);
-							mole_visible_sec[iii] = mole_visible_sec[iii] - 300;
-							break;
-						case HEDDEN:
-							mole_visible_sec[iii] = 3000; //３秒
-							break;
+								c.drawBitmap(grass, 100+imageWidth*i, 100+imageHeight*ii, paint);
+								if(mole_visible_sec[iii] < 0){
+									mole_visible_sec[iii] = 3000;
+									mole_status[iii] = HIDDEN;
+									mole_visible[iii] = 1;
+								}else if(mole_visible_sec[iii] == 3000){
+									mole_visible_sec[iii] = mole_visible_sec[iii] - 300;
+								}else{
+									mole_visible_sec[iii] = mole_visible_sec[iii] - 300;
+								}
+								break;
+						case HIDDEN:
+								mole_hit[iii] = 0;
+								if(mole_visible_sec[iii] < 0){
+									mole_visible_sec[iii] = 3000;
+									mole_status[iii] = VISIBLE;
+									mole_visible[iii] = 0;
+								}else if(mole_visible_sec[iii] == 3000){
+									mole_visible_sec[iii] = mole_visible_sec[iii] - 300;
+								}else{
+									mole_visible_sec[iii] = mole_visible_sec[iii] - 300;
+								}
+								break;
 						case HIT:
-							mole_hit[iii] = 0; // ヒットした証拠
-							mole_status[iii] = FINISH;
-							break;
+								mole_status[iii] = FINISH;
+								break;
 						case FINISH:
-							mole_status[iii] = VISIBLE;
-							break;
+								mole_hit[iii] = 0; // ヒットした証拠
+								mole_status[iii] = VISIBLE;
+								break;
 
 						default:
-							break;
+								break;
 						}
 					   iii++;
 				   	}
@@ -293,12 +310,18 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 							   //モグラがtrueの場合かうんと
 								//touchYに３をかけると２段目は３から始まる。３段目は６から始まる。
 								int num = touchX + touchY*3;
-							   if(mole_visible[num] == 0){
-								Log.i("GameCount", "-mole_red-[" + touchX +","+ touchY + "]");
-								mole_hit[num] = 1; // ヒットした証拠
-								mole_status[num] = HIT;
-								GameCount++;
-								//Log.i("GameCount", "" + GameCount + "");
+								// 0=false 1=true;
+								Log.i("num-------", "[" + num + "]");
+							    if(mole_visible[num] == 1){
+									Log.i("num-------hit", "[" + num + "]");
+										if(mole_hit[num] == 0 && mole_status[num] == VISIBLE){
+											GameCount++;
+											mole_visible[num] = 0;
+											mole_status[num] = HIDDEN;
+											mole_visible_sec[num] = 3000;
+										}
+									//Log.i("GameCount", "" + GameCount + "");
+										mole_hit[num] = 1; // ヒットした証拠
 							   }
 							}
 						}
@@ -338,5 +361,6 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 		 return true;
 
 	}
+	
 }
 
