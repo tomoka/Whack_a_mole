@@ -51,11 +51,14 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 
     /**モグラ用のカウント*/
     int[] mole = new int[9] ;
-    //モグラの表示の有無 0=false 1=true
-    int[] mole_visible = new int[9] ;
+    //モグラの初期表示の有無 0=false 1=true
+    int[] mole_start_visible = new int[9] ;
     //モグラのヒットの有無 0=false 1=true
     int[] mole_hit = new int[9] ;
-    //モグラのヒットの表示時間
+    //モグラのヒットの表示切り替え一定時間
+    static final int mole_sec = 4000 ;
+	//フレームレート 1000/14
+    static final int mole_sec_fps = 14 ;
     int[] mole_visible_sec = new int[9] ;
     //モグラのヒットのステータス
     int[] mole_status = new int[9] ;
@@ -110,21 +113,77 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 		for(int i = 0;i< 3;i++){
 		   for(int ii = 0;ii< 3;ii++){
 			   //c.drawBitmap(grass, drawX-imageWidth*i, drawY-imageHeight*ii, paint);
-				mole_visible[iiii] = rnd.nextInt(2);
-				//Log.d("mole_visible[iiii]---------", "" + mole_visible[iiii] + "");
+				//見える見えない初期値　1=true(みえる) 0=false(みえない)
+				mole_start_visible[iiii] = rnd.nextInt(2);
 				mole_status[iiii] = STANDBY;
 				mole_hit[iiii] = 0;
-				mole_visible_sec[iiii] = 3000; //すべてのモグラに3000ミリ秒
-				if(mole_visible[iiii] == 1){
+				if(mole_start_visible[iiii] == 1){
 					mole_status[iiii] = VISIBLE;
+					mole_visible_sec[iiii] = rnd.nextInt(mole_sec)+100; //すべてのモグラにランダム+100ミリ秒
 				}else{
 					mole_status[iiii] = HIDDEN;
+					mole_visible_sec[iiii] = rnd.nextInt(mole_sec)+100; //すべてのモグラにランダム+100ミリ秒
 				}
-				   iiii++;
+					Log.d("mole_visible[iiiii]---------", "" + mole_visible_sec[iiii] + "");
+					iiii++;
 		   	}
 		}
 		//ゲームスタート
 		STAGE = GAME;
+    }
+    
+    public void drawMole(){
+		//キャンバス用意ロックする
+		c = holder.lockCanvas();
+		if(c != null){
+		//キャンバスを白く塗りつぶしてタッチした場所へ描画
+		c.drawColor(Color.WHITE);
+		int iii = 0;
+		//９ならべる
+		for(int i = 0;i< 3;i++){
+		   for(int ii = 0;ii< 3;ii++){
+			//c.drawBitmap(grass, drawX-imageWidth*i, drawY-imageHeight*ii, paint);
+				//モグラのステータス
+				switch (mole_status[iii]) {
+				case VISIBLE:
+						c.drawBitmap(grass, 100+imageWidth*i, 100+imageHeight*ii, paint);
+						if(mole_visible_sec[iii] < 0){
+							mole_visible_sec[iii] = rnd.nextInt(mole_sec)+100;
+							mole_status[iii] = HIDDEN;
+							mole_hit[iii] = 0;
+						}else{
+							mole_visible_sec[iii] = mole_visible_sec[iii] - mole_sec_fps;
+						}
+						break;
+				case HIDDEN:
+						if(mole_visible_sec[iii] < 0){
+							mole_visible_sec[iii] = rnd.nextInt(mole_sec)+100;
+							mole_hit[iii] = 0;
+							mole_status[iii] = VISIBLE;
+						}else{
+							mole_visible_sec[iii] = mole_visible_sec[iii] - mole_sec_fps;
+						}
+						break;
+				case HIT:
+						mole_status[iii] = FINISH;
+						break;
+				case FINISH:
+						mole_hit[iii] = 0; // ヒットした証拠
+						mole_status[iii] = VISIBLE;
+						break;
+
+				default:
+						break;
+				}
+			   iii++;
+		   	}
+		}
+		//c.drawBitmap(goburin, drawX, drawY, paint);
+		Log.d("tag", "X:" + drawX + ",Y:" + drawY);
+		c.drawText("タッチ回数は『"+GameCount+"』回です", viewWidth/2, viewHeight/2, paint);
+		}		
+		//キャンバスロックをはずす
+	    holder.unlockCanvasAndPost(c);
     }
     
     private Activity mActivity;
@@ -183,7 +242,8 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 			loopCount++;
 			Log.i("tag", "" +loopCount+"");
 			//waitTime = (loopCount * FRAME_TIME) - (System.currentTimeMillis() - startTime);
-			waitTime = 300;
+
+			waitTime = mole_sec_fps;
             Log.i("tag", "" +waitTime+"");
 			if( waitTime > 0 ){
 				try {
@@ -194,72 +254,19 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 				}
 	            Log.i("tag", "loopCount:" +loopCount+"");
 				loopCount = 0;
-			}else{
 			}
-			
+		
+		//ステージと時間の管理
 		switch (STAGE) {
 			case INIT:
+				//モグラ初期化メゾット
 				init();
 				break;
 			case GAME:
-				//キャンバス用意ロックする
-				c = holder.lockCanvas();
-				if(c != null){
-				//キャンバスを白く塗りつぶしてタッチした場所へ描画
-				c.drawColor(Color.WHITE);
-				int iii = 0;
-				//９ならべる
-				for(int i = 0;i< 3;i++){
-				   for(int ii = 0;ii< 3;ii++){
-					//c.drawBitmap(grass, drawX-imageWidth*i, drawY-imageHeight*ii, paint);
-						//モグラのステータス
-						switch (mole_status[iii]) {
-						case VISIBLE:
-								c.drawBitmap(grass, 100+imageWidth*i, 100+imageHeight*ii, paint);
-								if(mole_visible_sec[iii] < 0){
-									mole_visible_sec[iii] = 3000;
-									mole_status[iii] = HIDDEN;
-									mole_visible[iii] = 1;
-								}else if(mole_visible_sec[iii] == 3000){
-									mole_visible_sec[iii] = mole_visible_sec[iii] - 300;
-								}else{
-									mole_visible_sec[iii] = mole_visible_sec[iii] - 300;
-								}
-								break;
-						case HIDDEN:
-								mole_hit[iii] = 0;
-								if(mole_visible_sec[iii] < 0){
-									mole_visible_sec[iii] = 3000;
-									mole_status[iii] = VISIBLE;
-									mole_visible[iii] = 0;
-								}else if(mole_visible_sec[iii] == 3000){
-									mole_visible_sec[iii] = mole_visible_sec[iii] - 300;
-								}else{
-									mole_visible_sec[iii] = mole_visible_sec[iii] - 300;
-								}
-								break;
-						case HIT:
-								mole_status[iii] = FINISH;
-								break;
-						case FINISH:
-								mole_hit[iii] = 0; // ヒットした証拠
-								mole_status[iii] = VISIBLE;
-								break;
-
-						default:
-								break;
-						}
-					   iii++;
-				   	}
-				}
-				//c.drawBitmap(goburin, drawX, drawY, paint);
-				Log.d("tag", "X:" + drawX + ",Y:" + drawY);
-				c.drawText("タッチ回数は『"+GameCount+"』回です", viewWidth/2, viewHeight/2, paint);
-				}		
-				//キャンバスロックをはずす
-			    holder.unlockCanvasAndPost(c);
+				//モグラ描画メゾット
+				drawMole();
 				break;
-			case 3:
+			case RESULT:
 				//キャンバス用意ロックする
 				c = holder.lockCanvas();
 				//キャンバスを白く塗りつぶしてタッチした場所へ描画
@@ -270,7 +277,7 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 				//キャンバスロックをはずす
 			    holder.unlockCanvasAndPost(c);			
 				break;
-			case 4:
+			case SETTING:
 				//キャンバス用意ロックする
 				c = holder.lockCanvas();
 				//キャンバスを白く塗りつぶしてタッチした場所へ描画
@@ -295,66 +302,57 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 					drawX = event.getX();
 					drawY = event.getY();
 			        switch (STAGE){
-					case INIT:
-						break;
-					case GAME:
-						//タッチ領域判定
-						//小数点は切り捨て
-						int touchX = (int) ((drawX-100)/imageWidth);
-						int touchY = (int) ((drawY-100)/imageHeight);
-						
-						Log.i("GameCount", "-touch-[" + touchX +","+ touchY + "]");
-
-						if(touchX < 4 && touchX >= 0){
-							if(touchY < 4 && touchY >= 0){
-							   //モグラがtrueの場合かうんと
-								//touchYに３をかけると２段目は３から始まる。３段目は６から始まる。
-								int num = touchX + touchY*3;
-								// 0=false 1=true;
-								Log.i("num-------", "[" + num + "]");
-							    if(mole_visible[num] == 1){
-									Log.i("num-------hit", "[" + num + "]");
-										if(mole_hit[num] == 0 && mole_status[num] == VISIBLE){
-											GameCount++;
-											mole_visible[num] = 0;
-											mole_status[num] = HIDDEN;
-											mole_visible_sec[num] = 3000;
-										}
-									//Log.i("GameCount", "" + GameCount + "");
-										mole_hit[num] = 1; // ヒットした証拠
-							   }
+						case INIT:
+							break;
+						case GAME:
+							//タッチ領域判定
+							//小数点は切り捨て
+							int touchX = (int) ((drawX-100)/imageWidth);
+							int touchY = (int) ((drawY-100)/imageHeight);
+							
+							Log.i("GameCount", "-touch-[" + touchX +","+ touchY + "]");
+	
+							if(touchX < 4 && touchX >= 0){
+								if(touchY < 4 && touchY >= 0){
+								   //モグラがtrueの場合かうんと
+									//touchYに３をかけると２段目は３から始まる。３段目は６から始まる。
+									int num = touchX*3 + touchY;
+									Log.i("num-------", "[" + num + "]");
+								    if(mole_status[num] == VISIBLE){
+										Log.i("num-------hit", "[" + num + "]");
+											if(mole_hit[num] == 0){
+												GameCount++;
+												mole_status[num] = HIDDEN;
+												mole_visible_sec[num] = mole_sec; //ステータスの切り替わりで 3000ミリ秒追加
+												mole_hit[num] = 1; // ヒットした証拠
+											}
+											Log.i("num-------GameCount", "[" + GameCount + "]");
+								   }
+								}
 							}
-						}
-												
-						if(GameCount > 10){
-							STAGE = RESULT;
-						 }
-						break;
-					case RESULT:
-						STAGE = SETTING;
-						//スレッド破棄
-						thread = null;
-						break;
-					case SETTING:
-						 //STAGE = TITLE;
-						GameCount = 0;
-						//surfaceDestroyed(null);
-						mActivity.finish();
-						break;
-						}
+													
+							if(GameCount > 30){
+								STAGE = RESULT;
+							 }
+							break;
+						case RESULT:
+							STAGE = SETTING;
+							//スレッド破棄
+							thread = null;
+							break;
+						case SETTING:
+							 //STAGE = TITLE;
+							GameCount = 0;
+							//surfaceDestroyed(null);
+							mActivity.finish();
+							break;
+							}
 
 		            break;
 		        case MotionEvent.ACTION_MOVE:
-		            Log.i("tag", "ACTION_MOVE");
-		            break;
 		        case MotionEvent.ACTION_UP:
-		            Log.i("tag", "ACTION_UP");
-		            break;
 		        case MotionEvent.ACTION_CANCEL:
-		            Log.i("tag", "ACTION_CANCEL");
-		        	break;
 		        default:
-		            Log.i("tag", "default");
 		            break;
 	        }
 
