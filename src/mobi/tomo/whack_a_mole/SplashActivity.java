@@ -12,6 +12,12 @@ import android.view.animation.Animation.AnimationListener;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenCallback;
+//import aurelienribon.tweenengine.TweenGroup;
+import aurelienribon.tweenengine.TweenManager;
+import aurelienribon.tweenengine.equations.Quart;
+
 public class SplashActivity extends Activity implements AnimationListener{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

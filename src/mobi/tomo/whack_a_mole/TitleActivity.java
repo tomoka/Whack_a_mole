@@ -2,6 +2,7 @@ package mobi.tomo.whack_a_mole;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -22,10 +23,15 @@ public class TitleActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		// splash.xmlをViewに指定します。
 		setContentView(R.layout.title);
-		
-		
-	}
-
+		}
+	 	 
+	//Runnableインターフェイスなどで毎フレームupdate()メソッドを実行する
+	/*@Override
+	public void draw(Canvas canvas)
+	{
+			_manager.update();
+			_circle.draw(canvas);//円の描画更新
+	}*/
 	//タッチ入力処理
 	@Override
 		public boolean onTouchEvent(MotionEvent event) {

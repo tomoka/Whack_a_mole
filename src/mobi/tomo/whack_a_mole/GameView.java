@@ -131,12 +131,9 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 		//ゲームスタート
 		STAGE = GAME;
     }
-    
-    public void drawMole(){
-    }
-    
+        
     private Activity mActivity;
-    DrawMole drawMole = new DrawMole;
+    DrawMole drawMole = new DrawMole();
     
 	/* コンストラクタ 引数1  @param context*/
 	public GameView(Context context, int windowWidth, int windowHeight) {
@@ -213,8 +210,28 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 				init();
 				break;
 			case GAME:
+				//キャンバス用意ロックする,
+				c = holder.lockCanvas();
 				//モグラ描画メゾット
-				drawMole();
+				drawMole.Draw(
+						c,
+						mole_status,
+						mole_visible_sec,
+						mole_hit,
+						mole_sec,
+						imageWidth,
+						imageHeight,
+						grass,
+						viewWidth,
+						viewHeight,
+						paint,
+						mole_sec_fps,
+						mole_sec,
+						GameCount
+						);
+				//キャンバスロックをはずす
+			    holder.unlockCanvasAndPost(c);
+
 				break;
 			case RESULT:
 				//キャンバス用意ロックする
@@ -222,7 +239,6 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 				//キャンバスを白く塗りつぶしてタッチした場所へ描画
 				c.drawColor(Color.WHITE);
 			    //c.drawColor(0,PorterDuff.Mode.CLEAR ); 
-
 				c.drawText("[case:3]リザルトタップしてセッティング画面", viewWidth/2, viewHeight/2, paint);
 				//キャンバスロックをはずす
 			    holder.unlockCanvasAndPost(c);			
@@ -277,6 +293,8 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 												mole_hit[num] = 1; // ヒットした証拠
 											}
 											Log.i("num-------GameCount", "[" + GameCount + "]");
+								   }else{
+										GameCount--;
 								   }
 								}
 							}
