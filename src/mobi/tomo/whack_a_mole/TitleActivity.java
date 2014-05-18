@@ -25,13 +25,6 @@ public class TitleActivity extends Activity {
 		setContentView(R.layout.title);
 		}
 	 	 
-	//Runnableインターフェイスなどで毎フレームupdate()メソッドを実行する
-	/*@Override
-	public void draw(Canvas canvas)
-	{
-			_manager.update();
-			_circle.draw(canvas);//円の描画更新
-	}*/
 	//タッチ入力処理
 	@Override
 		public boolean onTouchEvent(MotionEvent event) {

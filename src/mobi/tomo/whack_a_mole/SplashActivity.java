@@ -1,65 +1,121 @@
 package mobi.tomo.whack_a_mole;
 
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
-import android.view.Window;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.widget.ImageView;
-import android.widget.Toast;
-
+import android.widget.LinearLayout;
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenCallback;
-//import aurelienribon.tweenengine.TweenGroup;
 import aurelienribon.tweenengine.TweenManager;
-import aurelienribon.tweenengine.equations.Quart;
+import aurelienribon.tweenengine.equations.Bounce;
 
-public class SplashActivity extends Activity implements AnimationListener{
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		// タイトルを非表示にします。
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		
-		// splash.xmlをViewに指定します。
-		setContentView(R.layout.splash);
-		
-		ImageView img = (ImageView) findViewById(R.id.img);
+public class SplashActivity extends Activity {
 
-		//スプラッシュアニメーションのセット
-		 AlphaAnimation alphaanime = new AlphaAnimation(1, 0);
-		 alphaanime.setStartOffset(1000);
-		 alphaanime.setDuration(3000);
-		 alphaanime.setFillAfter(true);
-		 alphaanime.setAnimationListener(this);
-		 img.startAnimation(alphaanime);
+  private TweenManager tweenManager = new TweenManager();
 
-		//ハンドラ使わない!!
-		//Handler hdl = new Handler();
-		// 3000ms遅延させてsplashHandlerを実行します。
-		//hdl.postDelayed(new splashHandler(),10000);
-	}
-	@Override
-	public void onAnimationEnd(Animation animation) {
-	    Toast.makeText(this, "AnimationEnd", Toast.LENGTH_SHORT).show();
-		// スプラッシュ完了後に実行するActivityを指定します。
-		Intent intent = new Intent(getApplication(), TitleActivity.class);
-		startActivity(intent);
-		// SplashActivityを終了させます。
-		SplashActivity.this.finish();
-	}
-	 
-	@Override
-	public void onAnimationRepeat(Animation animation) {
-	    Toast.makeText(this, "AnimationRepeat", Toast.LENGTH_SHORT).show();
-	}
-	 
-	@Override
-	public void onAnimationStart(Animation animation) {
-	    Toast.makeText(this, "AnimationStart", Toast.LENGTH_SHORT).show();
-	}
+  private boolean isAnimationRunning = true;
+
+  private LinearLayout genueHamster;
+
+  @Override public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.splash);
+
+    //Setup it
+    genueHamster = (LinearLayout) findViewById(R.id.main_cont);
+    setTweenEngine();
+  }
+
+  /**
+   * Initiate the Tween Engine
+   */
+  private void setTweenEngine() {
+    //start animation theread
+    setAnimationThread();
+
+    //**Register Accessor, this is very important to do!
+    //You need register actually each Accessor, but right now we have global one, which actually suitable for everything.
+    Tween.registerAccessor(ViewContainer.class, new ViewContainerAccessor());
+    
+    startAnimation();
+    
+  }
+
+  /**
+   * Timeout 1 sec after press
+   */
+  public void startAnimation() {
+
+    //Create object which we will animate
+    ViewContainer cont = new ViewContainer();
+    //pass our real container
+    cont.view = genueHamster;
+
+    ///start animations
+    Tween.to(cont, ViewContainerAccessor.POSITION_XY, 0.5f).target(100, 200).ease(Bounce.OUT).delay(1.0f).start(tweenManager);
+    
+	// スプラッシュ完了後に実行するActivityを指定します。
+	Intent intent = new Intent(getApplication(), TitleActivity.class);
+	startActivity(intent);
+	// SplashActivityを終了させます。
+	SplashActivity.this.finish();
+
+  }
+
+  /***
+   * Thread that should run for update UI via Tween engine
+   */
+  private void setAnimationThread() {
+
+    new Thread(new Runnable() {
+      private long lastMillis = -1;
+
+      @Override public void run() {
+        while (isAnimationRunning) {
+          if (lastMillis > 0) {
+            long currentMillis = System.currentTimeMillis();
+            final float delta = (currentMillis - lastMillis) / 1000f;
+
+            /**
+             * We run all animation in UI thread instead of using post for each elements.
+             */
+            runOnUiThread(new Runnable() {
+
+              @Override public void run() {
+                tweenManager.update(delta);
+
+              }
+            });
+
+            lastMillis = currentMillis;
+          } else {
+            lastMillis = System.currentTimeMillis();
+          }
+
+          try {
+            Thread.sleep(1000 / 60);
+          } catch (InterruptedException ex) {
+          }
+        }
+      }
+    }).start();
+
+  }
+
+  /**
+   * Stop animation thread
+   */
+  private void setAnimationFalse() {
+    isAnimationRunning = false;
+  }
+
+  /**
+   * Make animation thread alive
+   */
+  private void setAnimationTrue() {
+    isAnimationRunning = true;
+  }
+
 }
