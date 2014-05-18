@@ -1,11 +1,16 @@
 package mobi.tomo.whack_a_mole;
 
 
+import java.sql.Types;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import aurelienribon.tweenengine.BaseTween;
+import aurelienribon.tweenengine.Timeline;
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenCallback;
 import aurelienribon.tweenengine.TweenManager;
@@ -34,7 +39,7 @@ public class SplashActivity extends Activity {
   private void setTweenEngine() {
     //start animation theread
     setAnimationThread();
-
+    
     //**Register Accessor, this is very important to do!
     //You need register actually each Accessor, but right now we have global one, which actually suitable for everything.
     Tween.registerAccessor(ViewContainer.class, new ViewContainerAccessor());
@@ -45,22 +50,47 @@ public class SplashActivity extends Activity {
 
   /**
    * Timeout 1 sec after press
+ * @param COMPLETE 
    */
   public void startAnimation() {
 
     //Create object which we will animate
     ViewContainer cont = new ViewContainer();
+    TweenCallback callBack = new TweenCallback(){
+		@Override
+		public void onEvent(int arg0, BaseTween<?> arg1) {
+			// TODO Auto-generated method stub
+            Log.v("tag222",String.valueOf(arg0));
+            TweenCallbackObj();
+		}
+    };
+    
     //pass our real container
     cont.view = genueHamster;
-
-    ///start animations
-    Tween.to(cont, ViewContainerAccessor.POSITION_XY, 0.5f).target(100, 200).ease(Bounce.OUT).delay(1.0f).start(tweenManager);
     
-	// スプラッシュ完了後に実行するActivityを指定します。
-	Intent intent = new Intent(getApplication(), TitleActivity.class);
-	startActivity(intent);
-	// SplashActivityを終了させます。
-	SplashActivity.this.finish();
+    Timeline.createSequence()
+    .push(Tween.to(cont, ViewContainerAccessor.POSITION_XY, 0.5f).target(100, 200).ease(Bounce.OUT).delay(1.0f))
+    .push(Tween.to(cont, ViewContainerAccessor.POSITION_XY, 0.5f).target(100, 200).ease(Bounce.OUT).delay(1.0f))
+    .push(Tween.call(callBack).target(100, 200).ease(Bounce.OUT).delay(1.0f))
+    .repeat(5, 500)
+    .start(tweenManager); 
+  }
+  private Object TweenCallbackObj() {
+	// TODO Auto-generated method stub
+		// スプラッシュ完了後に実行するActivityを指定します。
+		Intent intent = new Intent(getApplication(), TitleActivity.class);
+		startActivity(intent);
+		// SplashActivityを終了させます。
+		SplashActivity.this.finish();
+	return null;
+}
+
+public void startTitle() {
+		// スプラッシュ完了後に実行するActivityを指定します。
+		Intent intent = new Intent(getApplication(), TitleActivity.class);
+		startActivity(intent);
+		// SplashActivityを終了させます。
+		SplashActivity.this.finish();
 
   }
 
