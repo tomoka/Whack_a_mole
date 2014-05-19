@@ -12,13 +12,11 @@
 	    android:scaleType="centerInside"
 	    android:src="@drawable/goburin" />
 
-	<EditText
-	    android:id="@+id/editText1"
-	    android:layout_width="match_parent"
-	    android:layout_height="wrap_content"
-	    android:ems="10" >
-
-	    <requestFocus />
-	</EditText>
+     <TextView
+		  android:layout_width="fill_parent"
+		  android:layout_height="wrap_content"
+		android:gravity="center"
+		android:textSize="24dp"
+		android:text="モグラたたきスタート！！" />
 
 </LinearLayout>

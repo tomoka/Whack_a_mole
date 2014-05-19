@@ -5,28 +5,32 @@ import java.sql.Types;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.LinearLayout;
 import aurelienribon.tweenengine.BaseTween;
 import aurelienribon.tweenengine.Timeline;
 import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenCallback;
 import aurelienribon.tweenengine.TweenManager;
-import aurelienribon.tweenengine.equations.Bounce;
+import aurelienribon.tweenengine.equations.*;
 
 public class SplashActivity extends Activity {
 
   private TweenManager tweenManager = new TweenManager();
-
   private boolean isAnimationRunning = true;
-
   private LinearLayout genueHamster;
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.splash);
+	// タイトルを非表示にします。
+	requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+	setContentView(R.layout.splash);
 
     //Setup it
     genueHamster = (LinearLayout) findViewById(R.id.main_cont);
@@ -50,6 +54,7 @@ public class SplashActivity extends Activity {
 
   /**
    * Timeout 1 sec after press
+ * @param ROTATION 
  * @param COMPLETE 
    */
   public void startAnimation() {
@@ -61,7 +66,7 @@ public class SplashActivity extends Activity {
 		public void onEvent(int arg0, BaseTween<?> arg1) {
 			// TODO Auto-generated method stub
             Log.v("tag222",String.valueOf(arg0));
-            TweenCallbackObj();
+            startTitle();
 		}
     };
     
@@ -69,21 +74,23 @@ public class SplashActivity extends Activity {
     cont.view = genueHamster;
     
     Timeline.createSequence()
-    .push(Tween.to(cont, ViewContainerAccessor.POSITION_XY, 0.5f).target(100, 200).ease(Bounce.OUT).delay(1.0f))
-    .push(Tween.to(cont, ViewContainerAccessor.POSITION_XY, 0.5f).target(100, 200).ease(Bounce.OUT).delay(1.0f))
-    .push(Tween.call(callBack).target(100, 200).ease(Bounce.OUT).delay(1.0f))
-    .repeat(5, 500)
+    /*
+     *   public static final int POSITION_X = 1;
+     *   public static final int POSITION_Y = 2;
+     *   public static final int POSITION_XY = 3;
+     *   public static final int ROTATION = 4;
+     *   public static final int SCALE = 5;
+     *   public static final int ALPHA = 6;
+     */
+    .push(Tween.set(cont, 6).target(0))
+    .push(Tween.to(cont, 6, 2.0f).target(1).ease(Back.OUT).delay(0.5f))
+    .push(Tween.set(cont, 6).target(1))
+    .push(Tween.to(cont, 4, 2.0f).target(360).ease(Bounce.OUT))
+ 	.push(Tween.to(cont, 1, 1.0f).target(-200).ease(Expo.OUT).delay(0.5f))
+ 	.push(Tween.to(cont, 1, 1.5f).target(3000).ease(Expo.OUT))
+    .push(Tween.call(callBack))
     .start(tweenManager); 
   }
-  private Object TweenCallbackObj() {
-	// TODO Auto-generated method stub
-		// スプラッシュ完了後に実行するActivityを指定します。
-		Intent intent = new Intent(getApplication(), TitleActivity.class);
-		startActivity(intent);
-		// SplashActivityを終了させます。
-		SplashActivity.this.finish();
-	return null;
-}
 
 public void startTitle() {
 		// スプラッシュ完了後に実行するActivityを指定します。
@@ -91,7 +98,6 @@ public void startTitle() {
 		startActivity(intent);
 		// SplashActivityを終了させます。
 		SplashActivity.this.finish();
-
   }
 
   /***

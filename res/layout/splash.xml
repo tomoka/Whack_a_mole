@@ -1,10 +1,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="#FFFFFF" >
 
     <LinearLayout
-        android:id="@+id/main_cont"
+	    android:id="@+id/main_cont"
 	    android:orientation="vertical"
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent">
@@ -13,12 +14,7 @@
 		    android:layout_width="fill_parent" 
 		    android:layout_height="fill_parent" 
 		    android:scaleType="centerInside"
-		    android:src="@drawable/goburin" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sample Text" />
+		    android:src="@drawable/goburin"/>
 
        </LinearLayout>
 
