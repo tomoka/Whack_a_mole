@@ -29,6 +29,7 @@ public class DrawMole {
 			Bitmap grass,
 			int viewWidth,
 			int viewHeight,
+			int viewScale,
 			Paint paint,
 			int mole_sec_fps,
 			int mole_sec1,
@@ -50,7 +51,7 @@ public class DrawMole {
 					//モグラのステータス
 					switch (mole_status[iii]) {
 						case VISIBLE:
-							c.drawBitmap(grass, 100+imageWidth1*i, 100+imageHeight1*ii, paint);
+							c.drawBitmap(grass, 100+imageWidth1*i*viewScale, 100+imageHeight1*ii*viewScale, paint);
 								if(mole_visible_sec[iii] < 0){
 									mole_visible_sec[iii] = rnd.nextInt(mole_sec1)+100;
 									mole_status[iii] = HIDDEN;
@@ -87,5 +88,6 @@ public class DrawMole {
 			c.drawText("タッチ回数は『"+GameCount+"』回です", viewWidth1/2, viewHeight1/2, paint);
 			}		
 	}
+
 }
 

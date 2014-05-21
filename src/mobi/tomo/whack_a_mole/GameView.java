@@ -105,7 +105,10 @@ public class GameView extends SurfaceView implements Callback, Runnable {
     //Thread mainLoop;
     int viewHeight;
     int viewWidth;
-    
+
+    //画面サイズ用スケール
+    int viewScale;
+
     public void init(){
 		//モグラの初期化
 		int iiii = 0;
@@ -147,7 +150,10 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 
 		viewWidth = windowWidth;
 		viewHeight = windowHeight;
-        holder = getHolder();
+ 
+	    viewScale = Math.min(viewWidth, viewHeight)/480;
+		
+		holder = getHolder();
         //callbackメソッド（下の３つ）を登録
         //callbackメソッドを登録
         holder.addCallback(this);
@@ -224,6 +230,7 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 						grass,
 						viewWidth,
 						viewHeight,
+						viewScale,
 						paint,
 						mole_sec_fps,
 						mole_sec,
@@ -317,9 +324,6 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 							}
 
 		            break;
-		        case MotionEvent.ACTION_MOVE:
-		        case MotionEvent.ACTION_UP:
-		        case MotionEvent.ACTION_CANCEL:
 		        default:
 		            break;
 	        }
