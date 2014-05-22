@@ -2,6 +2,8 @@ package mobi.tomo.whack_a_mole;
 
 import java.util.Random;
 
+import android.util.Log;
+
 public class MoleObj {
 
     //モグラの初期表示の有無 0=false 1=true
@@ -33,8 +35,37 @@ public class MoleObj {
 		}
 	
 	public void MoleStatus(){
-		mole_start_visible = rnd.nextInt(2);
-		mole_status = STANDBY;
+		//ステータス分岐
+			switch (mole_status){
+				case VISIBLE:
+						if(mole_visible_sec < 0){
+							mole_visible_sec = rnd.nextInt(mole_sec1)+100;
+							mole_status = HIDDEN;
+							mole_hit = 0;
+						}else{
+							mole_visible_sec = mole_visible_sec - mole_sec_fps;
+						}
+					break;
+				case HIDDEN:
+					if(mole_visible_sec < 0){
+						mole_visible_sec = rnd.nextInt(mole_sec1)+100;
+						mole_hit = 0;
+						mole_status = VISIBLE;
+					}else{
+						mole_visible_sec = mole_visible_sec - mole_sec_fps;
+					}
+					break;
+				case HIT:
+						mole_status = FINISH;
+					break;
+				case FINISH:
+						mole_hit = 0; // ヒットした証拠
+						mole_status = VISIBLE;
+						mole_visible_sec = mole_sec; //ステータスの切り替わりで 3000ミリ秒追加
+					break;
+		        default:
+		            break;
+			}
 		}
 	
 }
