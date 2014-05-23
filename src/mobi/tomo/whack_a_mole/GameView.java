@@ -56,7 +56,8 @@ public class GameView extends SurfaceView implements Callback, Runnable {
     //モグラのヒットの有無 0=false 1=true
     int[] mole_hit = new int[9] ;
     //モグラのヒットの表示切り替え一定時間
-    static final int mole_sec = 4000 ;
+    //MoleObj.javaへ移動しました。
+    //static final int mole_sec = 4000 ;
 	//フレームレート 1000/14
     static final int mole_sec_fps = 14 ;
     int[] mole_visible_sec = new int[9] ;
@@ -136,7 +137,7 @@ public class GameView extends SurfaceView implements Callback, Runnable {
     }
         
     private Activity mActivity;
-    DrawMole drawMole = new DrawMole();
+    MoleDraw drawMole = new MoleDraw();
     
 	/* コンストラクタ 引数1  @param context*/
 	public GameView(Context context, int windowWidth, int windowHeight) {
