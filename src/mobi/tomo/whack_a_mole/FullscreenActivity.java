@@ -39,7 +39,7 @@ public class FullscreenActivity extends Activity {
 		private static String TAG = "gameView";
 		int windowWidth = 0;
 		int windowHeight = 0;
-		//GameView gameView = new GameView(null, windowWidth, windowHeight);				
+		GameView gameView;				
        
 	@Override
 	    public void onCreate(Bundle savedInstanceState) {
@@ -72,7 +72,7 @@ public class FullscreenActivity extends Activity {
 					Log.i("tag", ""+ windowWidth + "");
 					Log.i("tag", ""+ windowHeight + "");
 	
-			        GameView gameView = new GameView(this, windowWidth, windowHeight);
+			        gameView = new GameView(this, windowWidth, windowHeight);
 			        l.addView(gameView,windowWidth,windowHeight);
 					Toast.makeText(this,"ゲームclassの読み込みに成功しました。", Toast.LENGTH_LONG).show();
 				} catch (Exception ex) {
@@ -124,25 +124,8 @@ public class FullscreenActivity extends Activity {
 			super.onDestroy();
 			Log.i(TAG, "onDestroy");
 			//スレッドを破棄する
+			gameView.thread = null;
 			}
 	
-	//タッチ入力処理
-	@Override
-		public boolean onTouchEvent(MotionEvent event) {
-		 switch (event.getAction()) {
-		        case MotionEvent.ACTION_DOWN:
-		            Log.i("tag", "ACTION_DOWN");
-		            
-		            break;
-		        case MotionEvent.ACTION_MOVE:
-		        case MotionEvent.ACTION_UP:
-		        case MotionEvent.ACTION_CANCEL:
-		        default:
-		            break;
-	        }
-
-		 return true;
-
-	}
 
 }
