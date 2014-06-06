@@ -72,8 +72,10 @@ public class MoleObj {
 
 	public void moleInit(int i,int ii){
 		mole_start_visible = rnd.nextInt(2);
+		mole_start_visible = 1;
 		mole_status = STANDBY;
 		moleAnimeStep = MoleAnimeStep.stay;
+		//mole_max_count = rnd.nextInt(mole_max_count);
 		moleAlpha = 255;
 		moleScale = 1;
 		moleRotate = 0;
@@ -135,8 +137,13 @@ public class MoleObj {
 				mole_start_visible = 1;
 				mole_status = VISIBLE;
 				mole_hit = 1;
+				
+				TweenAnimaition tweenAnimaition = new TweenAnimaition();
 				//きえたらさいごへ。。。。
 				if(moleAlpha > 1){
+					float moleAlpha2 = tweenAnimaition.easeInQuad(10, moleAlpha, 1, 0);
+					Log.i("GameCount", "---" + moleAlpha2 + "");
+					
 					moleAlpha = (int) (moleAlpha - (moleAlpha * 0.1));
 					moleScale = (float) (moleScale + (moleScale * 0.1));
 					moleRotate = (float) (moleRotate + (moleRotate * 0.1));
@@ -144,6 +151,7 @@ public class MoleObj {
 				if(moleAlpha <= 1){
 					mole_status = HIDDEN;
 					mole_start_visible = 0;
+					moleScale = 1;
 					passed_time = 0;
 					old_time = System.currentTimeMillis();
 					mole_hit = 0;

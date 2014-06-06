@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.PorterDuff.Mode;
@@ -56,6 +57,7 @@ public class GameView extends SurfaceView implements Callback, Runnable {
  
     /** 描画用ペイント */
     Paint paint;
+    Matrix matrix = new Matrix();
     /** 描画座標：X(初期値は表示されない領域)  */
     float drawX = 0;
     /** 描画座標：Y(初期値は表示されない領域) */
@@ -77,7 +79,7 @@ public class GameView extends SurfaceView implements Callback, Runnable {
     int viewWidth;
 
     //画面サイズ用スケール
-    int viewScale = 1;
+    float viewScale = 1;
 	//もぐらオブジェクトの生成準備
     //複数クラスを増やす時の文法
 	MoleObj[] moleObj = new MoleObj[9];
@@ -92,11 +94,8 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 		//９ならべる
 		for(int i = 0;i< 3;i++){
 		   for(int ii = 0;ii< 3;ii++){
-				Log.i("tag---i------------>", "" + i +"");
-
 				moleObj[m] = new MoleObj();
 			   	moleObj[m].moleInit(i,ii);
-				Log.i("tag---i*3+ii------------>", "" + moleObj[m].old_time +"");
 				m++;
 		   	}
 		}
@@ -109,17 +108,21 @@ public class GameView extends SurfaceView implements Callback, Runnable {
         super(context);
         mActivity = (Activity) context;
         
+        viewHeight = windowHeight;
+        viewWidth = windowWidth;
+        
+	    float m = Math.min(viewWidth, viewHeight);
+	    viewScale = m/1080;
+		Log.i("viewScale", "viewScale>>>>>" + viewScale + "");
+
         paint = new Paint();
 		paint.setARGB(200,0,0,0);
-		paint.setTextSize (63);
+		paint.setTextSize(64*viewScale);
 		paint.setTextAlign(Paint.Align.CENTER);
 
 		viewWidth = windowWidth;
 		viewHeight = windowHeight;
  
-	    //viewScale = Math.min(viewWidth, viewHeight)/480;
-	    Random rnd = new Random();
-
 		holder = getHolder();
         //callbackメソッド（下の３つ）を登録
         //callbackメソッドを登録
@@ -131,6 +134,7 @@ public class GameView extends SurfaceView implements Callback, Runnable {
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
 		Log.i("tag", "surfaceCreated");
+		//c = holder.lockCanvas();
 		//スレッドで描画開始
         thread.start();
    }
@@ -145,6 +149,7 @@ public class GameView extends SurfaceView implements Callback, Runnable {
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
 		Log.i("tag", "surfaceDestroyed");
+		//holder.unlockCanvasAndPost(c);
 		//スレッドを破棄する
 		thread = null;
    }
@@ -166,46 +171,70 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 					e.printStackTrace();
 				}
 			}
-		
+			
+	        Log.i("tag", "STAGE:" +viewScale+"");
+	        Log.i("scale", "scale:" +viewScale+"");
+
 		//ステージと時間の管理
 		switch (STAGE) {
 			case INIT:
 				init();
 				break;
 			case GAME:
-				c = holder.lockCanvas();
-				c.drawColor(Color.WHITE);
-				//モグラ描画メゾット
-				//９ならべる
-				for(int i = 0;i< 3;i++){
-				   for(int ii = 0;ii< 3;ii++){
-					   	moleObj[i*3+ii].moleObj();
-					   	
+			    try {
+		        	//キャンバスがあったら、画像を描き込む
+		    	    //if (c != null) {
+						//キャンバス用意ロックする
+						c = holder.lockCanvas();
+						//キャンバスを白く塗りつぶしてタッチした場所へ描画
+						c.drawColor(Color.WHITE);
+						
+						//モグラ描画メゾット
+						//９ならべる
+						for(int i = 0;i< 3;i++){
+						   for(int ii = 0;ii< 3;ii++){
+							   	moleObj[i*3+ii].moleObj();
 
-						switch (moleObj[i*3+ii].moleAnimeStep) {
-							case stay:
-								//何も書き込まない
-								break;
-							case step01:
-								paint.setAlpha(255);
-								c.drawBitmap(grass, 100+imageWidth*i*viewScale, 100+imageHeight*ii*viewScale, paint);
-								break;
-							case step02:
-								//消えるアニメーション中
-								Log.i("GameCount", "---moleAlpha---"+ moleObj[i*3+ii].moleAlpha + "");
-								paint.setAlpha(moleObj[i*3+ii].moleAlpha);
-								c.drawBitmap(goburin, 100+imageWidth*i*viewScale, 100+imageHeight*ii*viewScale, paint);
-								break;
-							case finish:
-								//何も書き込まない
-								break;
-							default:
-								break;
+								switch (moleObj[i*3+ii].moleAnimeStep) {
+									case stay:
+										//何も書き込まない
+										break;
+									case step01:
+										paint.setAlpha(255);
+										matrix.setTranslate(140*viewScale+imageWidth*i*viewScale, 140*viewScale+imageHeight*ii*viewScale);
+										matrix.preScale(viewScale, viewScale);
+										c.drawBitmap(grass,matrix, paint);
+										break;
+									case step02:
+										//消えるアニメーション中
+										paint.setAlpha(moleObj[i*3+ii].moleAlpha);
+										matrix.setTranslate(140*viewScale+imageWidth*i*viewScale, 140*viewScale+imageHeight*ii*viewScale);
+										matrix.preScale(moleObj[i*3+ii].moleScale, moleObj[i*3+ii].moleScale);
+										c.drawBitmap(goburin,matrix,paint);
+										break;
+									case finish:
+										//何も書き込まない
+										break;
+									default:
+										break;
+								}
+						   	}
 						}
-				   	}
-				}
-				//キャンバスロックをはずす
-			    holder.unlockCanvasAndPost(c);
+						paint.setAlpha(255);
+						c.drawText("[case:2]ゲーム中 スコア："+ variable.GameCount +"", viewWidth/2, viewHeight/2, paint);
+						//キャンバスロックをはずす
+					    holder.unlockCanvasAndPost(c);
+
+		           // }
+			    }catch(ArithmeticException e){
+		            //なにもしない
+			    	e.printStackTrace();
+		        } finally {
+		        	//書き込みを終了させる
+		            //if (c != null) holder.unlockCanvasAndPost(c);
+		        	//書き込みを終了ステータスアップデート
+			      	    //ステータス管理
+		        }
 
 				break;
 			case RESULT:
@@ -214,8 +243,6 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 				//キャンバスを白く塗りつぶしてタッチした場所へ描画
 				c.drawColor(Color.WHITE);
 				paint.setAlpha(255);
-
-			    //c.drawColor(0,PorterDuff.Mode.CLEAR ); 
 				c.drawText("[case:3]リザルトタップしてセッティング画面", viewWidth/2, viewHeight/2, paint);
 				//キャンバスロックをはずす
 			    holder.unlockCanvasAndPost(c);			
@@ -226,15 +253,11 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 				//キャンバスを白く塗りつぶしてタッチした場所へ描画
 				c.drawColor(Color.WHITE);
 				paint.setAlpha(255);
-
-			    //c.drawColor(0,PorterDuff.Mode.CLEAR ); 
-
 				c.drawText("[case:4]セッティング画面タップしてスタート", viewWidth/2, viewHeight/2, paint);
 				//キャンバスロックをはずす
 			    holder.unlockCanvasAndPost(c);			
 				break;
 		}
-        Log.i("tag", "STAGE:" +STAGE+"");
     }
 	}
 	//タッチ入力処理
@@ -252,8 +275,8 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 						case GAME:
 							//タッチ領域判定
 							//小数点は切り捨て
-							int touchX = (int) ((drawX-100)/imageWidth);
-							int touchY = (int) ((drawY-100)/imageHeight);
+							int touchX = (int) ((drawX-140*viewScale)/imageWidth*viewScale);
+							int touchY = (int) ((drawY-140*viewScale)/imageHeight*viewScale);
 							
 	
 							if(touchX < 4 && touchX >= 0){
@@ -261,17 +284,9 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 								   //モグラがtrueの場合かうんと
 									//touchYに３をかけると２段目は３から始まる。３段目は６から始まる。
 									int num = touchX*3 + touchY;
-									Log.i("GameCount", "-num-[" + num + "]");
-
 								    if(moleObj[num].moleAnimeStep == moleObj[num].moleAnimeStep.step01){
-												//moleObj[num].mole_status = moleObj[num].HIDDEN;
-												//moleObj[num].mole_visible_count = moleObj[num].mole_max_count; //ステータスの切り替わりで 3000ミリ秒追加
-												moleObj[num].mole_hit = 1; // ヒットした証拠
-												//moleObj[num].moleAnimeStep = moleObj[num].moleAnimeStep.step02;
-												variable.GameCount++;
-
-											Log.i("num-------GameCount", "[" + variable.GameCount + "]");
-											Log.i("num-------hit", "[" + num + "]");
+										moleObj[num].mole_hit = 1; // ヒットした証拠
+										variable.GameCount++;
 								   }else{
 									   variable.GameCount--;
 								   }
@@ -290,7 +305,6 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 						case SETTING:
 							 //STAGE = TITLE;
 							variable.GameCount = 0;
-							//surfaceDestroyed(null);
 							mActivity.finish();
 							break;
 							}
