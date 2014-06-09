@@ -72,7 +72,7 @@ public class MoleObj {
 
 	public void moleInit(int i,int ii){
 		mole_start_visible = rnd.nextInt(2);
-		mole_start_visible = 1;
+		//mole_start_visible = 1;
 		mole_status = STANDBY;
 		moleAnimeStep = MoleAnimeStep.stay;
 		//mole_max_count = rnd.nextInt(mole_max_count);
@@ -86,8 +86,9 @@ public class MoleObj {
 	     * [i=2 ii=0 6][i=2 ii=1 7][i=2 ii=2 8]
 	     */
 	    mole_num = i*3+ii;
-	    mole_num_X = i;
-	    mole_num_Y = ii;
+	    mole_num_X = ii;
+	    mole_num_Y = i;
+		mole_max_count = rnd.nextInt(4000)+500;
 	    
 	    if (mole_start_visible == 1) {
 	    	moleAnimeStep = MoleAnimeStep.step01;
@@ -111,6 +112,7 @@ public class MoleObj {
 					moleAnimeStep = MoleAnimeStep.step01;
 					passed_time = 0;
 					old_time = System.currentTimeMillis();
+					mole_max_count = rnd.nextInt(4000)+500;
 				}
 			break;
 		//Step01 見えてる
@@ -128,6 +130,7 @@ public class MoleObj {
 					passed_time = 0;
 					old_time = System.currentTimeMillis();
 					moleAnimeStep = MoleAnimeStep.finish;
+					mole_max_count = rnd.nextInt(4000)+500;
 				}
 			break;
 		//Step02　ヒットしたのできえる。。。
@@ -139,16 +142,26 @@ public class MoleObj {
 				mole_hit = 1;
 				
 				TweenAnimaition tweenAnimaition = new TweenAnimaition();
+				float moleAlpha2 = 100;
 				//きえたらさいごへ。。。。
 				if(moleAlpha > 1){
-					float moleAlpha2 = tweenAnimaition.easeInQuad(10, moleAlpha, 1, 0);
-					Log.i("GameCount", "---" + moleAlpha2 + "");
+					/*
+					 * t : 時間
+					* b : 開始の値(開始時の座標やスケールなど)
+					* c : 開始と終了の値の差分
+					* d : Tween(トゥイーン)の合計時間
+					*
+					 */
+					moleAlpha2 = tweenAnimaition.easeInQuad(passed_time, 100, 50, 4000);
+					Log.i("moleAlpha2", "-passed_time-" + passed_time + "");
+					Log.i("moleAlpha2", "---" + moleAlpha2 + "");
 					
 					moleAlpha = (int) (moleAlpha - (moleAlpha * 0.1));
-					moleScale = (float) (moleScale + (moleScale * 0.1));
+					moleScale = (float) (moleScale*1.1);
 					moleRotate = (float) (moleRotate + (moleRotate * 0.1));
 				}
-				if(moleAlpha <= 1){
+				if(passed_time >= 4000){
+				//if(moleAlpha <= 1){
 					mole_status = HIDDEN;
 					mole_start_visible = 0;
 					moleScale = 1;
@@ -156,11 +169,13 @@ public class MoleObj {
 					old_time = System.currentTimeMillis();
 					mole_hit = 0;
 					moleAnimeStep = MoleAnimeStep.finish;
+					mole_max_count = rnd.nextInt(4000)+500;
 				}
 			break;
 		//finish 最後
 		case finish:
 				//元に戻す
+				mole_max_count = rnd.nextInt(4000)+500;
 				moleAnimeStep = MoleAnimeStep.stay;
 			break;
 		default:
