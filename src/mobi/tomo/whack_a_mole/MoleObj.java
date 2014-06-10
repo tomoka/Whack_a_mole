@@ -141,23 +141,10 @@ public class MoleObj {
 				mole_status = VISIBLE;
 				mole_hit = 1;
 				
-				TweenAnimaition tweenAnimaition = new TweenAnimaition();
-				float moleAlpha2 = 100;
 				//きえたらさいごへ。。。。
 				if(moleAlpha > 1){
-					/*
-					 * t : 時間
-					* b : 開始の値(開始時の座標やスケールなど)
-					* c : 開始と終了の値の差分
-					* d : Tween(トゥイーン)の合計時間
-					*
-					 */
-					moleAlpha2 = tweenAnimaition.easeInQuad(passed_time, 100, 50, 4000);
-					Log.i("moleAlpha2", "-passed_time-" + passed_time + "");
-					Log.i("moleAlpha2", "---" + moleAlpha2 + "");
-					
 					moleAlpha = (int) (moleAlpha - (moleAlpha * 0.1));
-					moleScale = (float) (moleScale*1.1);
+					//moleScale = (float) (moleScale*1.1);
 					moleRotate = (float) (moleRotate + (moleRotate * 0.1));
 				}
 				if(passed_time >= 4000){

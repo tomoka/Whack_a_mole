@@ -1,5 +1,6 @@
 package mobi.tomo.whack_a_mole;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -66,6 +67,8 @@ public class GameView extends SurfaceView implements Callback, Runnable {
     int imageWidth = grass.getWidth();
     /** イメージの大きさ：高さ */
     int imageHeight = grass.getHeight();
+    
+    float moleScale = 4;
     /**もぐらの配列*/
     
     /** ループ内実行判定 */
@@ -204,16 +207,16 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 										matrix.preScale(viewScale, viewScale);
 										c.drawBitmap(grass,matrix, paint);
 										break;
-									case step02:
+									case step02:										
 										//消えるアニメーション中
-										paint.setAlpha(moleObj[i*3+ii].moleAlpha);
-										float x = (140*viewScale)+((imageWidth*viewScale)-(imageWidth*viewScale*moleObj[i*3+ii].moleScale)/2);
-										float y = (140*viewScale)+((imageHeight*viewScale)-(imageHeight*viewScale*moleObj[i*3+ii].moleScale)/2);
+										/*paint.setAlpha(moleObj[i*3+ii].moleAlpha);*/
+										float x = (float) ((140*viewScale)+((imageWidth*viewScale*ii*1.5)-(imageWidth*viewScale*moleObj[i*3+ii].moleScale)/2));
+										float y = (float) ((140*viewScale)+((imageHeight*viewScale*i*1.5)-(imageHeight*viewScale*moleObj[i*3+ii].moleScale)/2));
 										
-										Log.i("viewScale", "viewScale>>>>>" + (moleObj[i*3+ii].moleScale)+ " ");
+										//Log.i("viewScale", "viewScale>>>>>" + (moleObj[i*3+ii].moleScale)+ " ");
 
 										matrix.setTranslate(x, y);
-										matrix.preScale(moleObj[i*3+ii].moleScale*viewScale, moleObj[i*3+ii].moleScale*viewScale);
+										//matrix.preScale(moleObj[i*3+ii].moleScale*viewScale, moleObj[i*3+ii].moleScale*viewScale);
 										c.drawBitmap(goburin,matrix,paint);
 										break;
 									case finish:
@@ -229,7 +232,7 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 						//キャンバスロックをはずす
 					    holder.unlockCanvasAndPost(c);
 						if (!canvaseLock) {
-							c.drawColor(Color.WHITE);
+							//c.drawColor(Color.WHITE);
 							return;
 						}
 
