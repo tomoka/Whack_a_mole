@@ -12,6 +12,4 @@ public class TweenAnimation {
 		t--;
 		return c * Math.sqrt(1 - t*t) + b;
 	};
-
-
 }
