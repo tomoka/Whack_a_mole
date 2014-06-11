@@ -72,10 +72,8 @@ public class MoleObj {
 
 	public void moleInit(int i,int ii){
 		mole_start_visible = rnd.nextInt(2);
-		//mole_start_visible = 1;
 		mole_status = STANDBY;
 		moleAnimeStep = MoleAnimeStep.stay;
-		//mole_max_count = rnd.nextInt(mole_max_count);
 		moleAlpha = 255;
 		moleScale = 1;
 		moleRotate = 0;
@@ -96,7 +94,6 @@ public class MoleObj {
 	    old_time = System.currentTimeMillis();
 	}
 	public void moleObj() {
-		Log.i("tag---moleAnimeStep------------>", "" + moleAnimeStep +"");
 		switch (moleAnimeStep) {
 		//stay　時間を費やす
 		case stay:
@@ -117,14 +114,13 @@ public class MoleObj {
 			break;
 		//Step01 見えてる
 		case step01:
-				//passed_time = System.currentTimeMillis() - old_time;
-				Log.i("GameCount", "---step01");
 				mole_start_visible = 1;
 				mole_status = VISIBLE;
 				if(mole_hit == 1){
 					passed_time = 0;
 					old_time = System.currentTimeMillis();
 					moleAnimeStep = MoleAnimeStep.step02;
+					mole_max_count = rnd.nextInt(4000)+500;
 				}
 				if(mole_max_count < passed_time){
 					passed_time = 0;
@@ -140,15 +136,13 @@ public class MoleObj {
 				mole_start_visible = 1;
 				mole_status = VISIBLE;
 				mole_hit = 1;
-				
+
 				//きえたらさいごへ。。。。
 				if(moleAlpha > 1){
 					moleAlpha = (int) (moleAlpha - (moleAlpha * 0.1));
-					//moleScale = (float) (moleScale*1.1);
+					moleScale = (float) TweenAnimation.easeOutCirc(passed_time,1,2,mole_max_count);
 					moleRotate = (float) (moleRotate + (moleRotate * 0.1));
-				}
-				if(passed_time >= 4000){
-				//if(moleAlpha <= 1){
+				}else{
 					mole_status = HIDDEN;
 					mole_start_visible = 0;
 					moleScale = 1;

@@ -209,14 +209,13 @@ public class GameView extends SurfaceView implements Callback, Runnable {
 										break;
 									case step02:										
 										//消えるアニメーション中
-										/*paint.setAlpha(moleObj[i*3+ii].moleAlpha);*/
-										float x = (float) ((140*viewScale)+((imageWidth*viewScale*ii*1.5)-(imageWidth*viewScale*moleObj[i*3+ii].moleScale)/2));
-										float y = (float) ((140*viewScale)+((imageHeight*viewScale*i*1.5)-(imageHeight*viewScale*moleObj[i*3+ii].moleScale)/2));
+										paint.setAlpha(moleObj[i*3+ii].moleAlpha);
+										//画像の描画の起点が変わるので、マージン+画像の横幅または縦幅
+										float x = (float) ((140*viewScale+imageWidth*viewScale*ii)-((imageWidth*viewScale*moleObj[i*3+ii].moleScale)-(imageWidth*viewScale))/2);
+										float y = (float) ((140*viewScale+imageHeight*viewScale*i)-((imageHeight*viewScale*moleObj[i*3+ii].moleScale)-(imageHeight*viewScale))/2);
 										
-										//Log.i("viewScale", "viewScale>>>>>" + (moleObj[i*3+ii].moleScale)+ " ");
-
 										matrix.setTranslate(x, y);
-										//matrix.preScale(moleObj[i*3+ii].moleScale*viewScale, moleObj[i*3+ii].moleScale*viewScale);
+										matrix.preScale(moleObj[i*3+ii].moleScale*viewScale, moleObj[i*3+ii].moleScale*viewScale);
 										c.drawBitmap(goburin,matrix,paint);
 										break;
 									case finish:
