@@ -138,9 +138,9 @@ public class MoleObj {
 				mole_hit = 1;
 
 				//きえたらさいごへ。。。。
-				if(moleAlpha > 1){
+				if(passed_time < 900){
 					moleAlpha = (int) (moleAlpha - (moleAlpha * 0.1));
-					moleScale = (float) TweenAnimation.easeOutCirc(passed_time,1,2,mole_max_count);
+					moleScale = (float) TweenAnimation.easeOutCirc(passed_time,1,1.1,100);
 					moleRotate = (float) (moleRotate + (moleRotate * 0.1));
 				}else{
 					mole_status = HIDDEN;

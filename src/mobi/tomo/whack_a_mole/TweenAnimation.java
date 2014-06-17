@@ -7,9 +7,10 @@ public class TweenAnimation {
 	float b;
 	
 	
-	static double easeOutCirc(float t,float b,float c,float d) {
+	static double easeOutCirc(float t,float b,double c,float d) {
 		t /= d;
 		t--;
 		return c * Math.sqrt(1 - t*t) + b;
-	};
+	}
+
 }
