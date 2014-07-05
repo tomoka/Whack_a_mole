@@ -34,22 +34,11 @@ public class MoleObj {
     //モグラのヒットのステータス
     int mole_status = 0;
     
-    /** イメージの大きさ：横 */
-    //int imageWidth;
-    /** イメージの大きさ：高さ */
-    //int imageHeight;
-
 	// 描画状態の定義:ステータスと配列の番号をひも付けできる
 	enum MoleAnimeStep {stay, step01, step02, finish};
 	MoleAnimeStep moleAnimeStep;
 	Variable variable = new Variable();
-	
-    //モグラ画像読み込み
-    //Bitmap grass;
-    //Bitmap goburin;
-    
-	//Paint paint = new Paint();
-	
+		
 	//モグラアニメーションのタイム変数
 	long old_time = 0;
 	long passed_time = 0;
